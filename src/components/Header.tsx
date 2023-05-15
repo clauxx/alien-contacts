@@ -1,8 +1,8 @@
 import styled from 'styled-components/native';
-import { headerHeight, debugStyle } from '@/utils/styles';
-import { H1 } from '@/components/styled';
-import { useNavigation } from '@react-navigation/native';
-import { useCallback } from 'react';
+import {headerHeight, debugStyle} from '@/utils/styles';
+import {H1} from '@/components/styled';
+import {useNavigation} from '@react-navigation/native';
+import {useCallback} from 'react';
 
 const HeaderContainer = styled.View`
   flex: 1;
@@ -29,8 +29,8 @@ interface HeaderProps {
   showBack: boolean;
 }
 
-export const Header = ({ title, showBack }: HeaderProps) => {
-  const { goBack } = useNavigation();
+export const Header = ({title, showBack}: HeaderProps) => {
+  const {goBack} = useNavigation();
 
   const handleBack = useCallback(() => {
     goBack();

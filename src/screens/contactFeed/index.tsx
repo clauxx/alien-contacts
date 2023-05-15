@@ -1,24 +1,28 @@
-import { Container, H1, H2 } from '@/components/styled';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
-import { User, Api } from '@/utils/api';
+import {Container, H1, H2} from '@/components/styled';
+import {memo, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useInfiniteQuery, useQueryClient} from '@tanstack/react-query';
+import {User, Api} from '@/utils/api';
+import {FlatList, ListRenderItem, RefreshControl} from 'react-native';
+import {colors} from '@/utils/styles';
 import {
-  ActivityIndicator,
-  FlatList,
-  ListRenderItem,
-  RefreshControl,
-} from 'react-native';
-import { colors } from '@/utils/styles';
-import { ContactCard } from '@/components/ContactCard';
+  ContactCard,
+  Fallback as ContactCardFallback,
+} from '@/components/ContactCard';
 import styled from 'styled-components/native';
-import { flattenPaginated } from '@/utils/contacts';
-import { ErrorBoundary } from 'react-error-boundary';
-import { useNavigation } from '@react-navigation/native';
-import { usePostViewability } from '@/utils/usePostViewability';
-import { randomInt } from '@/utils/random';
-import { setCanvas, useAppDispatch } from '@/store';
+import {flattenPaginated} from '@/utils/contacts';
+import {ErrorBoundary} from 'react-error-boundary';
+import {useNavigation} from '@react-navigation/native';
+import {usePostViewability} from '@/utils/usePostViewability';
+import {randomInt} from '@/utils/random';
+import {setCanvas, useAppDispatch} from '@/store';
 
 export const StyledList = styled(FlatList as typeof FlatList<User>)`
+  flex: 1;
+  padding-top: 60px;
+  padding-bottom: 80px;
+  padding-left: 40px;
+`;
+export const StyledListFallback = styled(FlatList as typeof FlatList<number>)`
   flex: 1;
   padding-top: 60px;
   padding-bottom: 80px;
@@ -46,44 +50,43 @@ const ShuffleImage = styled.Image`
 const PAGINATION_LIMIT = 8 as const;
 export const FEED_QUERY_KEY = 'feed' as const;
 
+const defaultData = {
+  pages: [],
+  pageParams: [],
+};
+
 const ContactsScreen = memo(() => {
   const listRef = useRef<FlatList<User>>(null);
   const [page, setPage] = useState(1);
   const {
-    data,
+    data = defaultData,
     fetchNextPage,
     isFetchingNextPage,
     refetch,
     isRefetching,
-    isLoading,
-    //@ts-ignore TS doesn't like the empty intialData
   } = useInfiniteQuery({
     queryKey: [FEED_QUERY_KEY],
-    queryFn: Api.posts({ limit: PAGINATION_LIMIT }),
-    keepPreviousData: false,
+    queryFn: Api.posts({limit: PAGINATION_LIMIT}),
     getNextPageParam: () => {
       return page;
     },
     useErrorBoundary: true,
-    initialData: [],
   });
   const listData = useMemo(() => flattenPaginated(data), [data]);
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
 
-  console.log({ l: listData.length });
-
   useEffect(() => {
-    listData.forEach(({ id }) => {
+    listData.forEach(({id}) => {
       dispatch(setCanvas(id));
     });
   }, [dispatch, listData]);
 
-  const { visiblePosts, handleViewPosts, viewabilityConfig } =
+  const {visiblePosts, handleViewPosts, viewabilityConfig} =
     usePostViewability();
 
   const handleRenderItem: ListRenderItem<User> = useCallback(
-    ({ item }) => {
+    ({item}) => {
       return (
         <ContactCard
           queryKey={FEED_QUERY_KEY}
@@ -92,12 +95,12 @@ const ContactsScreen = memo(() => {
         />
       );
     },
-    [visiblePosts]
+    [visiblePosts],
   );
 
   const fetchMore = useCallback(() => {
     if (!isFetchingNextPage) {
-      fetchNextPage({ pageParam: page + 1 }).then(() => {
+      fetchNextPage({pageParam: page + 1}).then(() => {
         setPage(page + 1);
       });
     }
@@ -106,11 +109,8 @@ const ContactsScreen = memo(() => {
   const refresh = useCallback(() => {
     if (!isRefetching) {
       setPage(1);
-      queryClient
-        .resetQueries({ queryKey: [FEED_QUERY_KEY], exact: true })
-        .then(() => {
-          refetch();
-        });
+      queryClient.setQueryData([FEED_QUERY_KEY], () => defaultData);
+      refetch();
     }
   }, [refetch, isRefetching, queryClient]);
 
@@ -122,20 +122,38 @@ const ContactsScreen = memo(() => {
     });
   }, [listData]);
 
-  return isLoading ? (
-    <CenterContainer>
-      <ActivityIndicator size={'large'} />
-    </CenterContainer>
+  const fallbackData = useMemo(
+    () =>
+      Array(10)
+        .fill(0)
+        .map((_, i) => i),
+    [],
+  );
+  const handleRenderFallback: ListRenderItem<number> = useCallback(
+    ({index}) => <ContactCardFallback key={index} />,
+    [],
+  );
+
+  return !listData.length ? (
+    <Container>
+      <StyledListFallback
+        data={fallbackData}
+        renderItem={handleRenderFallback}
+      />
+      <FloatingBtn>
+        <ShuffleImage source={require('@/assets/shuffle.png')} />
+      </FloatingBtn>
+    </Container>
   ) : (
     <Container>
       <StyledList
         ref={listRef}
         data={listData}
-        keyExtractor={(item) => `item-${item.id}`}
+        keyExtractor={item => `item-${item.id}`}
         renderItem={handleRenderItem}
         onEndReached={fetchMore}
         // eslint-disable-next-line react-native/no-inline-styles
-        contentContainerStyle={{ paddingBottom: 80 }}
+        contentContainerStyle={{paddingBottom: 80}}
         onEndReachedThreshold={2}
         refreshControl={
           <RefreshControl
@@ -160,13 +178,19 @@ const ErrorFallback = () => {
     navigation.setOptions({
       headerShown: false,
     });
+
+    return () => {
+      navigation.setOptions({
+        headerShown: true,
+      });
+    };
   }, [navigation]);
 
   return (
     <CenterContainer>
       <H1 theme={'light'}>:(</H1>
       {/* eslint-disable-next-line react-native/no-inline-styles */}
-      <H2 theme={'light'} style={{ marginTop: 20 }}>
+      <H2 theme={'light'} style={{marginTop: 20}}>
         Something went wrong
       </H2>
     </CenterContainer>

@@ -9,7 +9,7 @@ export const address = z.object({
   zip_code: z.string(),
   state: z.string(),
   country: z.string(),
-  coordinates: z.object({ lat: z.number(), lng: z.number() }),
+  coordinates: z.object({lat: z.number(), lng: z.number()}),
 });
 
 export const employment = z.object({
@@ -24,7 +24,7 @@ export const subscription = z.object({
   term: z.string(),
 });
 
-export const credit_card = z.object({ cc_number: z.string() });
+export const credit_card = z.object({cc_number: z.string()});
 
 export const user = z.object({
   id: z.number(),
@@ -57,11 +57,11 @@ const log = async <T>(res: T) => {
 
 export const Api = {
   posts:
-    ({ limit = 10 }) =>
+    ({limit = 10}) =>
     async () => {
       const url = BASE_URL + '/users' + `?size=${limit}`;
       return fetch(url)
-        .then((res) => res.json())
+        .then(res => res.json())
         .then(users.parse);
     },
 };

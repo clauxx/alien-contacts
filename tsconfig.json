@@ -5,8 +5,6 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": [
-      "@types/styled-components-react-native"
-    ]
+    "types": ["@types/styled-components-react-native", "jest"]
   }
 }

@@ -1,15 +1,14 @@
-import { AuthorAvatar, AuthorAvatarFallback } from '@/components/AuthorAvatar';
-import { H3, P3 } from '@/components/styled';
-import { useContact } from '@/utils/contacts';
-import { colors, debugStyle } from '@/utils/styles';
-import { memo, Suspense, useCallback } from 'react';
+import {AuthorAvatar, AuthorAvatarFallback} from '@/components/AuthorAvatar';
+import {H3, P3} from '@/components/styled';
+import {useContact} from '@/utils/contacts';
+import {colors, debugStyle} from '@/utils/styles';
+import {memo, Suspense, useCallback} from 'react';
 import styled from 'styled-components/native';
-import { useNavigation } from '@react-navigation/native';
-import { Pill, PillFallback } from './Pill';
-import { ErrorBoundary } from 'react-error-boundary';
-import { PrettyCanvas } from './PrettyCanvas';
-import { selectCanvasProps, useAppSelector } from '@/store';
-import { Canvas, Turbulence, Rect } from '@shopify/react-native-skia';
+import {useNavigation} from '@react-navigation/native';
+import {Pill, PillFallback} from './Pill';
+import {PrettyCanvas} from './PrettyCanvas';
+import {selectCanvasProps, useAppSelector} from '@/store';
+import {PaperBackground} from './PaperBackground';
 
 const cardDimensions = {
   width: 250,
@@ -52,6 +51,8 @@ const NameContainer = styled.View`
   flex: 0.7;
   align-items: flex-end;
   justify-content: flex-end;
+  padding-right: 8px;
+  padding-bottom: 4px;
   ${debugStyle()}
 `;
 const NameContainerFallback = styled(NameContainer)`
@@ -73,29 +74,23 @@ const Job = styled(P3)`
   margin-top: 4px;
   margin-bottom: -24px;
 `;
-const StyledCanvas = styled(Canvas)`
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  right: 0px;
-  bottom: 0px;
-  opacity: 0.3;
-`;
 
 interface ContactCardProps {
   id: number;
   queryKey: string;
-  hideAuthor?: boolean;
   visible?: boolean;
 }
 
-const ContactCardUnmemoized = ({ id, queryKey, visible }: ContactCardProps) => {
-  const contact = useContact(queryKey, id);
+const ContactCardUnmemoized = ({id, queryKey, visible}: ContactCardProps) => {
+  const {contact, error} = useContact(queryKey, id);
+  if (error) {
+    throw error;
+  }
   const navigation = useNavigation();
   const canvasProps = useAppSelector(selectCanvasProps(id));
 
   const handlePress = useCallback(() => {
-    navigation.navigate('Contact', { queryKey, id });
+    navigation.navigate('Contact', {queryKey, id});
   }, [queryKey, id, navigation]);
 
   if (!visible) {
@@ -103,7 +98,10 @@ const ContactCardUnmemoized = ({ id, queryKey, visible }: ContactCardProps) => {
   }
 
   return (
-    <Btn activeOpacity={0.8} onLongPress={handlePress}>
+    <Btn
+      testID="contact-card-btn"
+      activeOpacity={0.9}
+      onLongPress={handlePress}>
       <Header>
         <PrettyCanvas {...canvasProps} />
       </Header>
@@ -120,22 +118,13 @@ const ContactCardUnmemoized = ({ id, queryKey, visible }: ContactCardProps) => {
       <Footer>
         <Pill type={'email'} field={contact.email} />
       </Footer>
-      <StyledCanvas>
-        <Rect
-          x={0}
-          y={0}
-          width={cardDimensions.width}
-          height={cardDimensions.height}
-        >
-          <Turbulence freqX={0.9} freqY={0.9} octaves={7} />
-        </Rect>
-      </StyledCanvas>
+      <PaperBackground {...cardDimensions} />
     </Btn>
   );
 };
 
-const Fallback = () => (
-  <Btn>
+export const Fallback = () => (
+  <Btn testID="contact-card-fallback">
     <FallbackHeader />
     <Content>
       <NameContainerFallback />
@@ -151,8 +140,6 @@ const Fallback = () => (
 
 export const ContactCard = memo((props: ContactCardProps) => (
   <Suspense fallback={<Fallback />}>
-    <ErrorBoundary fallback={<Fallback />}>
-      <ContactCardUnmemoized {...props} />
-    </ErrorBoundary>
+    <ContactCardUnmemoized {...props} />
   </Suspense>
 ));

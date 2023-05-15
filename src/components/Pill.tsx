@@ -1,5 +1,5 @@
-import { P3 } from '@/components/styled';
-import { colors } from '@/utils/styles';
+import {P3} from '@/components/styled';
+import {colors} from '@/utils/styles';
 import styled from 'styled-components/native';
 
 const PillContainer = styled.View`
@@ -24,7 +24,6 @@ const PillPrefix = styled.View`
   width: 24px;
   border: 1px ${colors.pill} solid;
   background-color: ${colors.pill};
-  opacity: 0.8;
   margin-right: 4px;
   align-items: center;
   justify-content: center;
@@ -54,7 +53,7 @@ interface PillProps {
   field: string;
 }
 
-export const Pill = ({ type, field }: PillProps) => {
+export const Pill = ({type, field}: PillProps) => {
   return (
     <PillContainer>
       <PillPrefix>

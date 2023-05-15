@@ -5,7 +5,7 @@ import {
   createSlice,
   PayloadAction,
 } from '@reduxjs/toolkit';
-import { TypedUseSelectorHook, useSelector, useDispatch } from 'react-redux';
+import {TypedUseSelectorHook, useSelector, useDispatch} from 'react-redux';
 import {
   persistReducer,
   persistStore,
@@ -16,9 +16,9 @@ import {
   PURGE,
   REGISTER,
 } from 'redux-persist';
-import { PrettyCanvasProps } from './components/PrettyCanvas';
-import { randomInt } from './utils/random';
-import { colorSchemes, shuffleColors } from './utils/styles';
+import {PrettyCanvasProps} from './components/PrettyCanvas';
+import {randomInt} from './utils/random';
+import {colorSchemes, shuffleColors} from './utils/styles';
 
 interface CanvasState {
   config: Record<string, PrettyCanvasProps>;
@@ -44,7 +44,7 @@ const canvasSlice = createSlice({
   },
 });
 
-export const { setCanvas } = canvasSlice.actions;
+export const {setCanvas} = canvasSlice.actions;
 
 export const selectCanvasProps = (id: number) => (state: RootState) =>
   state.canvas.config[id.toString()];
@@ -58,11 +58,11 @@ const rootPersistConfig = {
   storage: AsyncStorage,
 };
 
-const persistedReducer = persistReducer(rootPersistConfig, reducers);
+export const persistedReducer = persistReducer(rootPersistConfig, reducers);
 
 export const store = configureStore({
   reducer: persistedReducer,
-  middleware: (getDefaultMiddleware) =>
+  middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
@@ -71,9 +71,11 @@ export const store = configureStore({
 });
 
 export const persistor = persistStore(store);
+export const canvasReducer = canvasSlice.reducer;
 
-type RootState = ReturnType<typeof store.getState>;
-type AppDispatch = typeof store.dispatch;
+export type AppStore = typeof store;
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
 
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 export const useAppDispatch = () => useDispatch<AppDispatch>();

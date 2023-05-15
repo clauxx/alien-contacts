@@ -1,11 +1,11 @@
 export const colorSchemes = {
   groove: {
-    orange: '#f58549',
-    magenta_haze: '#8e5572',
-    mint_cream: '#f2f7f2',
-    night: '#141414',
-    english_violet: '#443850',
-    light_english_violet: '#EBE7EE',
+    orange: 'rgba(245, 133, 73, 1)',
+    magenta_haze: 'rgba(142, 85, 114, 1)',
+    mint_cream: 'rgba(242, 247, 242, 1)',
+    night: 'rgba(20, 20, 20, 1)',
+    english_violet: 'rgba(68, 56, 80, 1)',
+    light_english_violet: 'rgba(235, 231, 238, 1)',
   },
 } as const;
 
@@ -37,7 +37,7 @@ const SHOW_DEBUG = false;
 
 const randomColor = (alpha: number) =>
   `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(
-    Math.random() * 256
+    Math.random() * 256,
   )}, ${Math.floor(Math.random() * 256)}, ${alpha})`;
 export const debugStyle = () =>
   __DEV__ && SHOW_DEBUG && `border: 1px solid ${randomColor(0.4)}`;

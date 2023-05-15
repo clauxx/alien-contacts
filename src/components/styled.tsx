@@ -1,7 +1,7 @@
-import { ViewProps } from 'react-native/types';
-import { useHeaderHeight } from '@react-navigation/elements';
+import {ViewProps} from 'react-native/types';
+import {useHeaderHeight} from '@react-navigation/elements';
 import styled from 'styled-components/native';
-import { colors, getTextColor } from '@/utils/styles';
+import {colors, getTextColor} from '@/utils/styles';
 
 export const SafeContainer = styled.SafeAreaView`
   flex: 1;
@@ -15,12 +15,12 @@ export const ContainerView = styled.View`
 export const Container = (props: ViewProps) => {
   const height = useHeaderHeight();
   return (
-    <ContainerView {...props} style={[props.style, { paddingTop: height }]} />
+    <ContainerView {...props} style={[props.style, {paddingTop: height}]} />
   );
 };
 
-const T = styled.Text<{ theme?: 'light' | 'dark' }>`
-  color: ${({ theme = 'dark' as const }) => getTextColor(theme)};
+const T = styled.Text<{theme?: 'light' | 'dark'}>`
+  color: ${({theme = 'dark' as const}) => getTextColor(theme)};
 `;
 
 export const H1 = styled(T)`

@@ -3,9 +3,9 @@ import {
   NavigationContainer,
   RouteProp,
 } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Header } from '@/components/Header';
-import { ContactProps } from '@/screens/contact';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {Header} from '@/components/Header';
+import {ContactProps} from '@/screens/contact';
 
 declare global {
   namespace ReactNavigation {
@@ -31,7 +31,7 @@ type GetOptions = <T extends keyof RootStackParamList>(args: {
 }) => {};
 
 const getOptionsWithHeader =
-  (config?: { showBack?: boolean }) =>
+  (config?: {showBack?: boolean}) =>
   (...[args]: Parameters<GetOptions>): ReturnType<GetOptions> =>
     ({
       headerShown: true,
@@ -40,6 +40,10 @@ const getOptionsWithHeader =
         <Header title={args.route.name} showBack={config?.showBack ?? false} />
       ),
     } as const);
+
+const optionsWithoutHeader = {
+  headerShown: false,
+};
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -52,11 +56,11 @@ export const Navigation = () => {
           getComponent={screens.Contacts}
           options={getOptionsWithHeader()}
         />
-        <Stack.Group screenOptions={{ presentation: 'modal' }}>
+        <Stack.Group screenOptions={{presentation: 'modal'}}>
           <Stack.Screen
             name="Contact"
             getComponent={screens.Contact}
-            options={getOptionsWithHeader({ showBack: true })}
+            options={optionsWithoutHeader}
           />
         </Stack.Group>
       </Stack.Navigator>
